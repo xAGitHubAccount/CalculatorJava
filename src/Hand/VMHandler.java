@@ -13,11 +13,14 @@ import GUI.Interface;
 //Handles events via listeners
 public class VMHandler implements ActionListener
 {
-
+	
 	Interface temp;
 	public VMHandler(Interface x)
 	{
 		temp = x;
+	}
+	public VMHandler() {
+		// TODO Auto-generated constructor stub
 	}
 	//performs something on display based on which button was pressed
 	@Override
@@ -132,11 +135,18 @@ public class VMHandler implements ActionListener
 				t.add(")");
 				intermediate = intermediate.replace(")", "");
 			}
-			t.add(intermediate);
+			
 			if(Character.isDigit(intermediate.charAt(0)) || isDouble(intermediate))
 			{
 				c = true;
 			}
+			
+			if(intermediate.charAt(0) == '0' && intermediate.charAt(intermediate.length() - 1) == '0')
+			{
+				intermediate = "0";
+			}
+			
+			t.add(intermediate);
 		}
 		return t;
 	}
@@ -155,7 +165,7 @@ public class VMHandler implements ActionListener
 		return true;
 	}
 	
-	//Converts the tokens or an ArrayList of String into Reverse Polish Notation
+	//Converts the tokens/ArrayList of String into Reverse Polish Notation
 	Queue<String> CRPN(ArrayList<String> v)
 	{
 		Queue<String> out = new LinkedList<String>();
@@ -233,57 +243,82 @@ public class VMHandler implements ActionListener
 		Stack<Double> s = new Stack<Double>();
 		Double right = (double) 0;
 		Double left = (double) 0;
-
+		int cd = 0;
+		
 		for (String x : v)
 		{
 			String temp = x;
-			
-			if (temp.equals("+"))
+			if (s.size() >= 2)
 			{
-				right = s.peek();
-				s.pop();
-				left = s.peek();
-				s.pop();
-				s.push(left + right);
-			}
-			else if (temp.equals("-"))
-			{
-				right = s.peek();
-				s.pop();
-				left = s.peek();
-				s.pop();
-				s.push(left - right);
-			}
-			else if (temp.equals("*"))
-			{
-				right = s.peek();
-				s.pop();
-				left = s.peek();
-				s.pop();
-				s.push(left * right);
-			}
-			else if (temp.equals("/"))
-			{
-				right = s.peek();
-				s.pop();
-				left = s.peek();
-				s.pop();
-				s.push(left / right);
-			}
-			else if (temp.equals("^"))
-			{
-				right = s.peek();
-				s.pop();
-				left = s.peek();
-				s.pop();
-				s.push((double)Math.pow(left, right));
+				cd = 1;
+				if (temp.equals("+"))
+				{
+					right = s.peek();
+					s.pop();
+					left = s.peek();
+					s.pop();
+					s.push(left + right);
+				}
+				else if (temp.equals("-"))
+				{
+					right = s.peek();
+					s.pop();
+					left = s.peek();
+					s.pop();
+					s.push(left - right);
+				}
+				else if (temp.equals("*"))
+				{
+					right = s.peek();
+					s.pop();
+					left = s.peek();
+					s.pop();
+					s.push(left * right);
+				}
+				else if (temp.equals("/"))
+				{
+					right = s.peek();
+					s.pop();
+					left = s.peek();
+					s.pop();
+					if(right == 0)
+					{
+						s.push(0.0);
+					}
+					else 
+					{
+						s.push(left / right);
+					}
+				}
+				else if (temp.equals("^"))
+				{
+					right = s.peek();
+					s.pop();
+					left = s.peek();
+					s.pop();
+					s.push((double)Math.pow(left, right));
+				}
 			}
 			else
 			{
-				s.push(Double.parseDouble(temp));
+				if(!temp.equals("+") && !temp.equals("-") && !temp.equals("*") && !temp.equals("/") && !temp.equals("^"))
+				{
+					s.push(Double.parseDouble(temp));
+				}
 			}
 		}
 
+		if(cd == 0)
+		{
+			return 0.0;
+		}
+		
+		
+		if (s.size() == 0)
+		{
+			return 0.0;
+		}
+		
 		return s.peek();
 	}
 	
